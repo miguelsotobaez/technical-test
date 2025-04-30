@@ -43,7 +43,7 @@ export class ElectricalBalanceService implements OnModuleInit {
     
     try {
       // Iteramos desde el año actual hacia atrás (orden descendente)
-      for (let year = currentYear; year >= currentYear - 9; year--) {
+      for (let year = currentYear; year >= currentYear - 10; year--) {
         const startDate = new Date(year, 0, 1); // 1 de enero del año
         const endDate = new Date(year, 11, 31); // 31 de diciembre del año
         

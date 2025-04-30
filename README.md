@@ -13,6 +13,14 @@ https://apidatos.ree.es/es/datos/balance/balance-electrico
 
 Este endpoint proporciona información del balance eléctrico nacional: generación, demanda, importaciones/exportaciones, etc.
 
+## Carga Automática de Datos Históricos
+El backend está configurado para realizar una carga automática de datos históricos al iniciar. El sistema obtiene y almacena:
+
+- Hasta 10 años de datos históricos del balance eléctrico de España
+- Los datos son extraídos directamente de la API de REE
+- La carga se realiza una única vez durante el arranque inicial del backend
+- Esta característica asegura que el sistema disponga de un conjunto de datos completo para análisis desde el primer uso
+
 ## Arquitectura del Sistema
 
 ### Backend
@@ -123,6 +131,8 @@ cd technical-test
 docker-compose up -d
 ```
 
+> **Nota importante**: Durante el primer arranque, el backend cargará automáticamente hasta 10 años de datos históricos desde la API de REE. Esto puede aumentar el tiempo de inicio, pero solo ocurre la primera vez. Puedes monitorizar este proceso a través de los logs: `docker-compose logs -f backend`
+
 4. Accede a la aplicación:
    - Frontend: http://localhost
    - API GraphQL: http://localhost/graphql
@@ -152,6 +162,8 @@ npm run start:dev
 ```
 
 El backend estará disponible en http://localhost:3000/graphql
+
+> **Nota**: Al iniciar por primera vez, el backend cargará automáticamente datos históricos de hasta 10 años desde la API de REE. Este proceso puede tardar varios minutos dependiendo de la cantidad de datos y la velocidad de conexión. Una vez completado, los datos quedarán almacenados en la base de datos MongoDB y estarán disponibles para consultas inmediatas a través de la API GraphQL.
 
 #### Frontend
 1. Navegar al directorio del frontend:
@@ -229,6 +241,21 @@ npm test
 cd frontend
 npm test
 ```
+
+## Características Destacadas
+
+### Carga Histórica Completa
+La aplicación ofrece hasta 10 años de datos históricos del balance eléctrico español, permitiendo:
+- Análisis de tendencias a largo plazo en la generación y demanda eléctrica
+- Comparativa de la evolución de energías renovables vs. no renovables a lo largo del tiempo
+- Estudio de patrones estacionales en importación/exportación de energía
+- Visualización completa del progreso en la transición energética de España
+
+### Interfaz Intuitiva
+- Dashboard responsive adaptado a cualquier dispositivo
+- Modo oscuro por defecto para reducir la fatiga visual
+- Filtrado de datos por períodos personalizables
+- Gráficos interactivos con tooltips informativos
 
 ## Mejoras Futuras
 
