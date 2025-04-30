@@ -1,169 +1,152 @@
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+"use client"
+
+import * as React from "react"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+import { CalendarIcon } from "lucide-react"
+import { DateRange } from "react-day-picker"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface DateRangePickerProps {
-  onDateRangeChange: (startDate: Date, endDate: Date) => void;
-  loading: boolean;
+  onDateRangeChange: (start: Date, end: Date) => void;
+  loading?: boolean;
+  startDate?: Date;
+  endDate?: Date;
 }
 
-export const DateRangePicker = ({ onDateRangeChange, loading }: DateRangePickerProps) => {
-  const [startDate, setStartDate] = useState<string>(
-    format(new Date(new Date().getFullYear(), new Date().getMonth() - 12, 1), 'yyyy-MM-dd')
-  );
-  const [endDate, setEndDate] = useState<string>(
-    format(new Date(), 'yyyy-MM-dd')
-  );
-  const [error, setError] = useState<string>('');
+export function DateRangePicker({ onDateRangeChange, loading = false, startDate, endDate }: DateRangePickerProps) {
+  // Inicializar con 5 años hacia atrás
+  const defaultFrom = new Date();
+  defaultFrom.setFullYear(defaultFrom.getFullYear() - 5);
+  defaultFrom.setMonth(0); // Enero
+  defaultFrom.setDate(1); // Día 1
+  
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: startDate || defaultFrom,
+    to: endDate || new Date(),
+  });
+  
+  // Referencia para controlar si el cambio viene desde fuera o desde el usuario
+  const isExternalUpdate = React.useRef(false);
 
-  const validateDateRange = (start: Date, end: Date): boolean => {
-    // Check if end date is after start date
-    if (end < start) {
-      setError('La fecha de fin debe ser posterior a la fecha de inicio');
-      return false;
+  // Actualizar el estado local cuando cambien las props de startDate o endDate (cambios externos)
+  React.useEffect(() => {
+    if (startDate && endDate) {
+      // Comprobar si las fechas han cambiado realmente
+      if (!date?.from || !date?.to || 
+          date.from.getTime() !== startDate.getTime() || 
+          date.to.getTime() !== endDate.getTime()) {
+        
+        isExternalUpdate.current = true;
+        setDate({
+          from: startDate,
+          to: endDate
+        });
+      }
     }
-    
-    // Ya no validamos el rango máximo de 1 año
-    
-    setError('');
-    return true;
-  };
+  }, [startDate, endDate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    if (validateDateRange(start, end)) {
-      onDateRangeChange(start, end);
+  // Sólo notificar al padre cuando el cambio lo hace el usuario (no externo)
+  React.useEffect(() => {
+    if (date?.from && date?.to && !isExternalUpdate.current) {
+      onDateRangeChange(date.from, date.to);
     }
-  };
-
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStartDate(e.target.value);
-    if (endDate) {
-      validateDateRange(new Date(e.target.value), new Date(endDate));
-    }
-  };
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEndDate(e.target.value);
-    if (startDate) {
-      validateDateRange(new Date(startDate), new Date(e.target.value));
-    }
-  };
-
-  // Ayudantes para establecer rangos predefinidos
-  const setLastMonth = () => {
-    const today = new Date();
-    const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-    
-    setStartDate(format(firstDayLastMonth, 'yyyy-MM-dd'));
-    setEndDate(format(lastDayLastMonth, 'yyyy-MM-dd'));
-    
-    if (validateDateRange(firstDayLastMonth, lastDayLastMonth)) {
-      onDateRangeChange(firstDayLastMonth, lastDayLastMonth);
-    }
-  };
-
-  const setLastYear = () => {
-    const today = new Date();
-    const firstDayLastYear = new Date(today.getFullYear() - 1, 0, 1);
-    const lastDayLastYear = new Date(today.getFullYear() - 1, 11, 31);
-    
-    setStartDate(format(firstDayLastYear, 'yyyy-MM-dd'));
-    setEndDate(format(lastDayLastYear, 'yyyy-MM-dd'));
-    
-    if (validateDateRange(firstDayLastYear, lastDayLastYear)) {
-      onDateRangeChange(firstDayLastYear, lastDayLastYear);
-    }
-  };
-
-  const setYTD = () => {
-    const today = new Date();
-    const firstDayThisYear = new Date(today.getFullYear(), 0, 1);
-    
-    setStartDate(format(firstDayThisYear, 'yyyy-MM-dd'));
-    setEndDate(format(today, 'yyyy-MM-dd'));
-    
-    if (validateDateRange(firstDayThisYear, today)) {
-      onDateRangeChange(firstDayThisYear, today);
-    }
-  };
+    // Resetear la bandera después de aplicar el cambio
+    isExternalUpdate.current = false;
+  }, [date, onDateRangeChange]);
 
   return (
-    <div className="bg-white p-4 border border-gray-300 rounded-md shadow-sm mb-4">
-      <div className="flex flex-col sm:flex-row justify-between mb-3">
-        <h2 className="text-base font-medium mb-2 sm:mb-0">Seleccionar rango de fechas</h2>
-        <div className="flex space-x-2">
-          <button 
-            type="button" 
-            onClick={setLastMonth}
-            className="px-2 py-1 bg-gray-100 text-gray-700 rounded border border-gray-300 text-xs"
+    <div className="grid gap-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            id="date"
+            variant={"outline"}
+            className={cn(
+              "w-full md:w-[300px] justify-start text-left font-normal",
+              !date && "text-muted-foreground",
+              loading && "opacity-70 cursor-not-allowed"
+            )}
             disabled={loading}
           >
-            Último mes
-          </button>
-          <button 
-            type="button" 
-            onClick={setLastYear}
-            className="px-2 py-1 bg-gray-100 text-gray-700 rounded border border-gray-300 text-xs"
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date?.from ? (
+              date.to ? (
+                <>
+                  {format(date.from, "d/M/yyyy", { locale: es })} - {" "}
+                  {format(date.to, "d/M/yyyy", { locale: es })}
+                </>
+              ) : (
+                format(date.from, "d/M/yyyy", { locale: es })
+              )
+            ) : (
+              <span>Seleccionar fechas</span>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            initialFocus
+            mode="range"
+            defaultMonth={date?.from}
+            selected={date}
+            onSelect={(newDate) => {
+              // Marcar como un cambio del usuario
+              isExternalUpdate.current = false;
+              setDate(newDate);
+            }}
+            numberOfMonths={2}
+            locale={es}
             disabled={loading}
-          >
-            Último año
-          </button>
-          <button 
-            type="button" 
-            onClick={setYTD}
-            className="px-2 py-1 bg-gray-100 text-gray-700 rounded border border-gray-300 text-xs"
-            disabled={loading}
-          >
-            Año actual
-          </button>
-        </div>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-        <div className="flex flex-col flex-1">
-          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de inicio
-          </label>
-          <input
-            type="date"
-            id="startDate"
-            value={startDate}
-            onChange={handleStartDateChange}
-            className="border border-gray-300 rounded-md p-2 w-full"
-            required
           />
-        </div>
-        <div className="flex flex-col flex-1">
-          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de fin
-          </label>
-          <input
-            type="date"
-            id="endDate"
-            value={endDate}
-            onChange={handleEndDateChange}
-            className="border border-gray-300 rounded-md p-2 w-full"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading || !!error}
-          className="self-end px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 font-medium disabled:bg-gray-50 disabled:text-gray-400"
-        >
-          {loading ? 'Cargando...' : 'Buscar datos'}
-        </button>
-      </form>
-      {error && (
-        <div className="mt-2 p-2 bg-red-100 border border-red-200 text-red-700 rounded text-sm">
-          {error}
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
-  );
-}; 
+  )
+}
+
+function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+function ChevronRightIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+} 
