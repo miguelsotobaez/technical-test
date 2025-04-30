@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { newtonsCradle } from 'ldrs';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -16,6 +17,29 @@ import {
   Cell,
 } from 'recharts';
 import { ElectricalBalance } from '../types';
+
+// Registra el componente para uso global
+newtonsCradle.register();
+
+// Definimos un componente de React específico
+const NewtonsCradleLoader = ({ size = 40, color = "#6B7280" }) => {
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (loaderRef.current) {
+      // Crear el elemento personalizado
+      const loader = document.createElement('l-newtons-cradle');
+      loader.setAttribute('size', size.toString());
+      loader.setAttribute('color', color);
+      
+      // Limpiar el contenedor y añadir el loader
+      loaderRef.current.innerHTML = '';
+      loaderRef.current.appendChild(loader);
+    }
+  }, [size, color]);
+
+  return <div ref={loaderRef} className="inline-block"></div>;
+};
 
 interface ElectricalBalanceChartProps {
   data: ElectricalBalance[];
@@ -42,8 +66,12 @@ export const ElectricalBalanceChart = ({ data }: ElectricalBalanceChartProps) =>
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6 text-center text-gray-500">
-        No hay datos disponibles para mostrar
+      <div className="text-center text-gray-500 py-8">
+        <div className="flex justify-center mb-4">
+          <NewtonsCradleLoader size={40} color="#6B7280" />
+        </div>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos disponibles</h3>
+        <p className="mt-1 text-sm text-gray-500">Seleccione un rango de fechas diferente o actualice los datos.</p>
       </div>
     );
   }
@@ -176,8 +204,8 @@ export const ElectricalBalanceChart = ({ data }: ElectricalBalanceChartProps) =>
   );
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Balance Eléctrico</h2>
+    <div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Balance Eléctrico</h2>
       
       <div className="flex justify-center mb-6">
         <div className="inline-flex rounded-md shadow-sm" role="group">
@@ -210,7 +238,7 @@ export const ElectricalBalanceChart = ({ data }: ElectricalBalanceChartProps) =>
               chartType === 'details'
                 ? 'bg-indigo-100 text-indigo-700'
                 : 'bg-white hover:bg-gray-100'
-            } border border-gray-300 rounded-r-md focus:z-10 focus:ring-2 focus:ring-indigo-500 focus:text-indigo-700`}
+            } border border-gray-300 rounded-r-lg focus:z-10 focus:ring-2 focus:ring-indigo-500 focus:text-indigo-700`}
           >
             Detalles
           </button>
@@ -220,6 +248,12 @@ export const ElectricalBalanceChart = ({ data }: ElectricalBalanceChartProps) =>
       {chartType === 'generation' && renderGenerationChart()}
       {chartType === 'balance' && renderBalanceChart()}
       {chartType === 'details' && renderDetailsCharts()}
+      
+      {data.length > 0 && (
+        <div className="mt-4 text-center text-sm text-gray-500">
+          {`Mostrando datos desde ${formattedData[0]?.formattedDate || ''} hasta ${formattedData[formattedData.length - 1]?.formattedDate || ''}`}
+        </div>
+      )}
     </div>
   );
 }; 

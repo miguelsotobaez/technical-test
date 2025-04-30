@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ElectricalBalanceRepository } from '../repositories/electrical-balance.repository';
@@ -25,7 +25,7 @@ interface BalanceRecord {
 }
 
 @Injectable()
-export class ElectricalBalanceService {
+export class ElectricalBalanceService implements OnModuleInit {
   private readonly logger = new Logger(ElectricalBalanceService.name);
   private readonly REE_API_BASE_URL = 'https://apidatos.ree.es/es/datos/balance/balance-electrico';
 
@@ -34,7 +34,46 @@ export class ElectricalBalanceService {
     private readonly electricalBalanceRepository: ElectricalBalanceRepository,
   ) {}
 
-  async fetchAndStoreDataByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  /**
+   * Método que se ejecuta al iniciar el módulo para cargar datos históricos
+   */
+  async onModuleInit() {
+    this.logger.log('Inicializando datos históricos de los últimos 5 años...');
+    const currentYear = new Date().getFullYear();
+    
+    try {
+      // Iteramos desde el año actual hacia atrás (orden descendente)
+      for (let year = currentYear; year >= currentYear - 9; year--) {
+        const startDate = new Date(year, 0, 1); // 1 de enero del año
+        const endDate = new Date(year, 11, 31); // 31 de diciembre del año
+        
+        // Verificar si ya existen datos para este año
+        const existingData = await this.electricalBalanceRepository.findByDateRange(startDate, endDate);
+        
+        // Si ya hay al menos algunos datos para este año, omitir la petición
+        if (existingData.length > 0) {
+          this.logger.log(`Ya existen ${existingData.length} registros para el año ${year}, omitiendo carga...`);
+          continue;
+        }
+        
+        this.logger.log(`Cargando datos del año ${year}...`);
+        await this.fetchAndStoreDataByDateRangeInternal(startDate, endDate);
+        
+        // Esperar 2 segundos entre peticiones para evitar sobrecargar la API
+        if (year > currentYear - 4) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+      this.logger.log('Datos históricos cargados correctamente');
+    } catch (error) {
+      this.logger.error('Error al cargar datos históricos', error);
+    }
+  }
+
+  /**
+   * Método interno para obtener y almacenar datos sin la restricción de 1 año
+   */
+  private async fetchAndStoreDataByDateRangeInternal(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
     try {
       if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
         throw new Error('Invalid start date');
@@ -80,7 +119,43 @@ export class ElectricalBalanceService {
     }
   }
 
+  async fetchAndStoreDataByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+    try {
+      if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
+        throw new Error('Invalid start date');
+      }
+      if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+        throw new Error('Invalid end date');
+      }
+      
+      // Ya no validamos el rango máximo de 1 año
+
+      // Reutilizar el método interno que no tiene la restricción de 1 año
+      return this.fetchAndStoreDataByDateRangeInternal(startDate, endDate);
+    } catch (error) {
+      this.logger.error('Error fetching data from REE API', error);
+      throw error;
+    }
+  }
+
   async getBalanceByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+    if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
+      throw new Error('Invalid start date');
+    }
+    if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+      throw new Error('Invalid end date');
+    }
+    
+    // Ya no validamos el rango máximo de 1 año
+
+    return this.electricalBalanceRepository.findByDateRange(startDate, endDate);
+  }
+
+  /**
+   * Método interno para consultar datos sin restricción de 1 año
+   * Útil para otras partes del sistema que necesiten consultar rangos mayores
+   */
+  async getBalanceByDateRangeInternal(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
       throw new Error('Invalid start date');
     }

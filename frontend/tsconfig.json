@@ -22,6 +22,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "src/types/ldrs.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

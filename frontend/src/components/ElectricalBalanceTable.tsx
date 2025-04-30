@@ -9,15 +9,19 @@ interface ElectricalBalanceTableProps {
 export const ElectricalBalanceTable = ({ data }: ElectricalBalanceTableProps) => {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6 text-center text-gray-500">
-        No hay datos disponibles para mostrar
+      <div className="text-center text-gray-500 py-8">
+        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No hay datos disponibles</h3>
+        <p className="mt-1 text-sm text-gray-500">Seleccione un rango de fechas diferente o actualice los datos.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6 overflow-x-auto">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Datos de Balance Eléctrico</h2>
+    <div className="overflow-x-auto">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Datos de Balance Eléctrico</h2>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -66,6 +70,9 @@ export const ElectricalBalanceTable = ({ data }: ElectricalBalanceTableProps) =>
           ))}
         </tbody>
       </table>
+      <div className="mt-4 text-center text-sm text-gray-500">
+        Mostrando {data.length} registros
+      </div>
     </div>
   );
 }; 
