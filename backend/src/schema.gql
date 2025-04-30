@@ -1,0 +1,38 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ElectricalBalanceDetails {
+  hydro: Float!
+  nonRenewable: Float!
+  nuclear: Float!
+  renewable: Float!
+  solar: Float!
+  storage: Float!
+  thermal: Float!
+  wind: Float!
+}
+
+type ElectricalBalanceType {
+  _id: String!
+  balance: Float!
+  demand: Float!
+  details: ElectricalBalanceDetails!
+  exports: Float!
+  generation: Float!
+  imports: Float!
+  timestamp: DateTime!
+}
+
+type Mutation {
+  fetchBalanceByDateRange(endDate: DateTime!, startDate: DateTime!): [ElectricalBalanceType!]!
+}
+
+type Query {
+  getBalanceByDateRange(endDate: DateTime!, startDate: DateTime!): [ElectricalBalanceType!]!
+}
