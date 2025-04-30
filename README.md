@@ -132,6 +132,8 @@ docker-compose up -d
 ```
 
 > **Nota importante**: Durante el primer arranque, el backend cargará automáticamente hasta 10 años de datos históricos desde la API de REE. Esto puede aumentar el tiempo de inicio, pero solo ocurre la primera vez. Puedes monitorizar este proceso a través de los logs: `docker-compose logs -f backend`
+>
+> **Nota sobre dependencias**: El frontend utiliza el parámetro `--legacy-peer-deps` durante la instalación para resolver problemas de compatibilidad entre dependencias, especialmente con React 19 y otras bibliotecas.
 
 4. Accede a la aplicación:
    - Frontend: http://localhost
@@ -173,7 +175,7 @@ cd frontend
 
 2. Instalar dependencias:
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
 3. Iniciar la aplicación:
