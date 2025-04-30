@@ -5,7 +5,7 @@ type Theme = "dark" | "light" | "system"
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem("theme") as Theme) || "system"
+    () => (localStorage.getItem("theme") as Theme) || "dark"
   )
 
   useEffect(() => {

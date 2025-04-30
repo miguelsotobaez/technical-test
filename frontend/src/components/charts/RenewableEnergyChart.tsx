@@ -78,7 +78,7 @@ export function RenewableEnergyChart({ data }: RenewableEnergyChartProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-gray-900">
       <CardHeader className="flex flex-col items-stretch space-y-0">
         <div className="flex justify-between items-center">
           <div>
@@ -108,6 +108,8 @@ export function RenewableEnergyChart({ data }: RenewableEnergyChartProps) {
               top: 10,
               bottom: 10,
             }}
+            barSize={30}
+            className="dark:[&_.recharts-cartesian-axis-line]:stroke-gray-800 dark:[&_.recharts-cartesian-grid-horizontal]:stroke-gray-800 dark:[&_.recharts-cartesian-grid-vertical]:stroke-gray-800"
           >
             <YAxis
               dataKey="source"

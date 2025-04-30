@@ -9,6 +9,7 @@ import { BarChart, RenewableEnergyChart, NonRenewableEnergyChart } from './compo
 import { GET_BALANCE_BY_DATE_RANGE, FETCH_BALANCE_BY_DATE_RANGE } from './graphql/queries'
 import { ElectricalBalance } from './types'
 import { Button } from './components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './components/ui/dialog'
 
 // Crear cliente Apollo
 const client = new ApolloClient({
@@ -23,6 +24,7 @@ function Dashboard() {
   const [endDate, setEndDate] = useState<Date>(new Date())
   const [updateMessage, setUpdateMessage] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [showAboutModal, setShowAboutModal] = useState<boolean>(false)
 
   // Consulta para obtener datos
   const {
@@ -96,13 +98,18 @@ function Dashboard() {
 
   // Effect para inicializar el tema según la preferencia guardada o del sistema
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "system";
+    const savedTheme = localStorage.getItem("theme") || "dark";
     const root = window.document.documentElement;
     
     if (savedTheme === "dark" || (savedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
+    }
+    
+    // Si no hay tema guardado, establecer a oscuro por defecto
+    if (!localStorage.getItem("theme")) {
+      localStorage.setItem("theme", "dark");
     }
   }, []);
 
@@ -112,7 +119,7 @@ function Dashboard() {
       <div className="flex">
         <aside className="hidden lg:flex flex-col w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 fixed">
           <div className="p-6">
-            <h1 className="text-2xl font-bold">REE Dashboard</h1>
+            <h1 className="text-2xl font-bold">Dashboard REE</h1>
           </div>
           <nav className="flex-1 p-4">
             <div className="space-y-1">
@@ -120,29 +127,65 @@ function Dashboard() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                 </svg>
-                Dashboard
+                Balance Eléctrico
               </a>
-              <a href="#" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clipRule="evenodd" />
-                </svg>
-                Histórico
-              </a>
-              <a href="#" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Análisis
-              </a>
-              <a href="#" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <button 
+                onClick={() => setShowAboutModal(true)}
+                className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 Acerca de
-              </a>
+              </button>
             </div>
           </nav>
         </aside>
+
+        {/* About Modal */}
+        <Dialog open={showAboutModal} onOpenChange={setShowAboutModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Acerca del Proyecto</DialogTitle>
+              <DialogDescription>
+                Dashboard para visualización de datos de balance eléctrico de España
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-1.5">
+                <h3 className="text-sm font-semibold">Autor</h3>
+                <p>Miguel Soto Baez</p>
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <h3 className="text-sm font-semibold">Enlaces</h3>
+                <div className="flex flex-col space-y-2">
+                  <a 
+                    href="https://github.com/miguelsotobaez" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-blue-600 dark:text-blue-500 hover:underline"
+                  >
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub: @miguelsotobaez
+                  </a>
+                  <a 
+                    href="https://www.linkedin.com/in/miguelsotobaez/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-blue-600 dark:text-blue-500 hover:underline"
+                  >
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                    LinkedIn: @miguelsotobaez
+                  </a>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-64">
@@ -150,7 +193,7 @@ function Dashboard() {
           <header className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <h1 className="text-xl font-semibold lg:hidden">REE Dashboard</h1>
+                <h1 className="text-xl font-semibold lg:hidden">Balance Eléctrico</h1>
               </div>
               <div className="flex items-center gap-4">
                 {/* Botón para cambiar el tema */}
@@ -278,7 +321,7 @@ function Dashboard() {
                       </Button>
                     </div>
                     <a 
-                      href="https://www.ree.es/es/datos-espana"
+                      href="https://www.ree.es/es/datos/balance/balance-electrico"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-600 dark:text-blue-500 hover:underline underline-offset-4 mt-2"
@@ -316,7 +359,7 @@ function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{totalGeneration.toLocaleString(undefined, {maximumFractionDigits: 2})} GWh</div>
                 <p className="text-xs text-muted-foreground text-gray-500 dark:text-gray-400">
-                  <span className={`${Number(generationChange) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  <span className={`${Number(generationChange) >= 0 ? 'text-green-500' : 'text-orange-500'}`}>
                     {Number(generationChange) >= 0 ? '+' : ''}{generationChange}%
                   </span> desde el mes pasado
                 </p>
@@ -332,7 +375,9 @@ function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{totalDemand.toLocaleString(undefined, {maximumFractionDigits: 2})} GWh</div>
                 <p className="text-xs text-muted-foreground text-gray-500 dark:text-gray-400">
-                  {balanceData.length} entradas
+                  <span className="text-green-500">
+                    {balanceData.length} entradas
+                  </span>
                 </p>
               </div>
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 p-6">
@@ -344,7 +389,9 @@ function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{totalExports.toLocaleString(undefined, {maximumFractionDigits: 2})} GWh</div>
                 <p className="text-xs text-muted-foreground text-gray-500 dark:text-gray-400">
-                  {(totalExports / (totalGeneration || 1) * 100).toFixed(1)}% de la generación
+                  <span className="text-green-500">
+                    {(totalExports / (totalGeneration || 1) * 100).toFixed(1)}% 
+                  </span> de la generación
                 </p>
               </div>
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 p-6">
@@ -356,7 +403,9 @@ function Dashboard() {
                 </div>
                 <div className="text-2xl font-bold">{totalImports.toLocaleString(undefined, {maximumFractionDigits: 2})} GWh</div>
                 <p className="text-xs text-muted-foreground text-gray-500 dark:text-gray-400">
-                  {(totalImports / (totalDemand || 1) * 100).toFixed(1)}% de la demanda
+                  <span className={`${(totalImports / (totalDemand || 1) * 100) < 20 ? 'text-green-500' : 'text-orange-500'}`}>
+                    {(totalImports / (totalDemand || 1) * 100).toFixed(1)}%
+                  </span> de la demanda
                 </p>
               </div>
             </div>
@@ -378,7 +427,7 @@ function Dashboard() {
 
                   {/* Data Table */}
                   <div className="rounded-lg border bg-card text-card-foreground shadow-sm bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 p-6 mb-6 mt-6">
-                    <h3 className="text-lg font-medium mb-4">Tabla de Datos</h3>
+                    <h3 className="text-lg font-medium mb-4">Datos de Balance Eléctrico</h3>
                     <ElectricalBalanceTable data={balanceData} />
                   </div>
                 </div>

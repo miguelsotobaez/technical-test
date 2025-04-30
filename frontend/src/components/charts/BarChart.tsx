@@ -86,7 +86,7 @@ export function BarChart({ data }: BarChartProps) {
   }, [chartData]);
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-gray-900">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle>Balance Eléctrico</CardTitle>
@@ -128,7 +128,7 @@ export function BarChart({ data }: BarChartProps) {
               bottom: 20,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" className="dark:opacity-20" />
             <XAxis
               dataKey="date"
               tickLine={false}

@@ -46,7 +46,6 @@ export const ElectricalBalanceTable = ({ data }: ElectricalBalanceTableProps) =>
 
   return (
     <div className="overflow-x-auto">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Datos de Balance Eléctrico</h2>
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
