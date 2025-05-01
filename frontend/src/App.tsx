@@ -14,10 +14,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 // URI for GraphQL API with environment variable support
 const apiUri = import.meta.env.VITE_API_URL || '/graphql';
 
-// Crear cliente Apollo
+// Crear cliente Apollo con configuración para credenciales y CORS
 const client = new ApolloClient({
   uri: apiUri,
   cache: new InMemoryCache(),
+  credentials: 'include', // Para enviar cookies de autenticación si se necesitan
+  headers: {
+    'Apollo-Require-Preflight': 'true', // Ayuda con la gestión de CORS en algunas configuraciones
+  },
 })
 
 function Dashboard() {

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ree-site
+    env: static
+    buildCommand: npm ci --legacy-peer-deps && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://ree-api.onrender.com/graphql 

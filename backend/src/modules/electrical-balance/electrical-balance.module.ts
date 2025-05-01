@@ -19,6 +19,8 @@ import { ElectricalBalanceSchema } from './schemas/electrical-balance.schema';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      playground: true,
+      introspection: true,
     }),
   ],
   providers: [
