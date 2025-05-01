@@ -30,7 +30,7 @@ function Dashboard() {
   )
   const [endDate, setEndDate] = useState<Date>(new Date())
   const [updateMessage, setUpdateMessage] = useState<string>('')
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
   const [showAboutModal, setShowAboutModal] = useState<boolean>(false)
 
   // Consulta para obtener datos
@@ -308,7 +308,7 @@ function Dashboard() {
                       {/* Reemplazar con el contenido de UpdateDataFooter pero adaptado */}
                       <div className="w-full sm:w-auto">
                         <select 
-                          value={selectedYear || new Date().getFullYear()}
+                          value={selectedYear}
                           onChange={(e) => setSelectedYear(Number(e.target.value))}
                           className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                           disabled={isLoading}
@@ -319,7 +319,7 @@ function Dashboard() {
                         </select>
                       </div>
                       <Button
-                        onClick={() => selectedYear && handleUpdateData(selectedYear)}
+                        onClick={() => handleUpdateData(selectedYear)}
                         disabled={isLoading}
                         className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
                       >
