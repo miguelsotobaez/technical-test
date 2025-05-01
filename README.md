@@ -244,6 +244,11 @@ cd backend
 npm test
 ```
 
+El backend cuenta con:
+- Pruebas unitarias completas con cobertura superior al 70%
+- Pruebas e2e implementadas
+- Ejecución automatizada de tests en cada build
+
 ### Frontend
 ```bash
 cd frontend
