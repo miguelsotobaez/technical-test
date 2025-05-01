@@ -11,9 +11,12 @@ import { ElectricalBalance } from './types'
 import { Button } from './components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './components/ui/dialog'
 
+// URI for GraphQL API with environment variable support
+const apiUri = import.meta.env.VITE_API_URL || '/graphql';
+
 // Crear cliente Apollo
 const client = new ApolloClient({
-  uri: '/graphql',
+  uri: apiUri,
   cache: new InMemoryCache(),
 })
 
