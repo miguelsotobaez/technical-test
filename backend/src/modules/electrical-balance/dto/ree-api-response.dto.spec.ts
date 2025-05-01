@@ -7,7 +7,7 @@ import {
   REEDataValue,
   REEMeta,
   REEMetaCacheControl,
-  REEDataAttributesWrapper
+  REEDataAttributesWrapper,
 } from './ree-api-response.dto';
 
 describe('REE API Response DTOs', () => {
@@ -125,7 +125,7 @@ describe('REE API Response DTOs', () => {
       data.attributes = {
         title: 'Main Data',
         'last-update': '2023-08-01T12:00:00Z',
-        description: 'Main data description'
+        description: 'Main data description',
       };
       data.meta = new REEMeta();
 
@@ -149,4 +149,4 @@ describe('REE API Response DTOs', () => {
       expect(response.included[0]).toBeInstanceOf(REEDataItem);
     });
   });
-}); 
+});

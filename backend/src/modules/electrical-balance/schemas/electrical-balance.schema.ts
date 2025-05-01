@@ -34,4 +34,5 @@ export class ElectricalBalance extends Document {
   };
 }
 
-export const ElectricalBalanceSchema = SchemaFactory.createForClass(ElectricalBalance); 
+export const ElectricalBalanceSchema =
+  SchemaFactory.createForClass(ElectricalBalance);

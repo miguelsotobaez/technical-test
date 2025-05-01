@@ -5,14 +5,19 @@ import { ElectricalBalanceType } from '../types/electrical-balance.type';
 
 @Resolver(() => ElectricalBalanceType)
 export class ElectricalBalanceResolver {
-  constructor(private readonly electricalBalanceService: ElectricalBalanceService) {}
+  constructor(
+    private readonly electricalBalanceService: ElectricalBalanceService,
+  ) {}
 
   @Query(() => [ElectricalBalanceType])
   async getBalanceByDateRange(
     @Args('startDate', { type: () => Date }) startDate: Date,
     @Args('endDate', { type: () => Date }) endDate: Date,
   ): Promise<ElectricalBalance[]> {
-    return this.electricalBalanceService.getBalanceByDateRange(startDate, endDate);
+    return this.electricalBalanceService.getBalanceByDateRange(
+      startDate,
+      endDate,
+    );
   }
 
   @Mutation(() => [ElectricalBalanceType])
@@ -20,6 +25,9 @@ export class ElectricalBalanceResolver {
     @Args('startDate', { type: () => Date }) startDate: Date,
     @Args('endDate', { type: () => Date }) endDate: Date,
   ): Promise<ElectricalBalance[]> {
-    return this.electricalBalanceService.fetchAndStoreDataByDateRange(startDate, endDate);
+    return this.electricalBalanceService.fetchAndStoreDataByDateRange(
+      startDate,
+      endDate,
+    );
   }
-} 
+}

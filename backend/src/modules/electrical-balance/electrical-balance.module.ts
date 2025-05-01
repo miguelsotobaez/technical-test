@@ -13,7 +13,7 @@ import { ElectricalBalanceSchema } from './schemas/electrical-balance.schema';
   imports: [
     HttpModule,
     MongooseModule.forFeature([
-      { name: 'ElectricalBalance', schema: ElectricalBalanceSchema }
+      { name: 'ElectricalBalance', schema: ElectricalBalanceSchema },
     ]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -30,4 +30,4 @@ import { ElectricalBalanceSchema } from './schemas/electrical-balance.schema';
   ],
   exports: [ElectricalBalanceService],
 })
-export class ElectricalBalanceModule {} 
+export class ElectricalBalanceModule {}

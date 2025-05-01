@@ -62,4 +62,4 @@ export class REEData {
 export class REEApiResponse {
   data: REEData;
   included: REEDataItem[];
-} 
+}

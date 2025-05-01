@@ -8,7 +8,7 @@ import { mockBalance } from '../__mocks__/mockData';
 describe('ElectricalBalanceResolver', () => {
   let resolver: ElectricalBalanceResolver;
   let service: ElectricalBalanceService;
-  
+
   // Create array of mock balances for testing
   const mockBalances = [mockBalance as ElectricalBalance];
 
@@ -20,7 +20,9 @@ describe('ElectricalBalanceResolver', () => {
           provide: ElectricalBalanceService,
           useValue: {
             getBalanceByDateRange: jest.fn().mockResolvedValue(mockBalances),
-            fetchAndStoreDataByDateRange: jest.fn().mockResolvedValue(mockBalances),
+            fetchAndStoreDataByDateRange: jest
+              .fn()
+              .mockResolvedValue(mockBalances),
           },
         },
       ],
@@ -38,10 +40,13 @@ describe('ElectricalBalanceResolver', () => {
     it('should return an array of electrical balance entries', async () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
-      
+
       const result = await resolver.getBalanceByDateRange(startDate, endDate);
-      
-      expect(service.getBalanceByDateRange).toHaveBeenCalledWith(startDate, endDate);
+
+      expect(service.getBalanceByDateRange).toHaveBeenCalledWith(
+        startDate,
+        endDate,
+      );
       expect(result).toEqual(mockBalances);
     });
 
@@ -49,10 +54,12 @@ describe('ElectricalBalanceResolver', () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       const error = new Error('Service error');
-      
+
       jest.spyOn(service, 'getBalanceByDateRange').mockRejectedValueOnce(error);
-      
-      await expect(resolver.getBalanceByDateRange(startDate, endDate)).rejects.toThrow(error);
+
+      await expect(
+        resolver.getBalanceByDateRange(startDate, endDate),
+      ).rejects.toThrow(error);
     });
   });
 
@@ -60,10 +67,13 @@ describe('ElectricalBalanceResolver', () => {
     it('should fetch and store balance data for a date range', async () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
-      
+
       const result = await resolver.fetchBalanceByDateRange(startDate, endDate);
-      
-      expect(service.fetchAndStoreDataByDateRange).toHaveBeenCalledWith(startDate, endDate);
+
+      expect(service.fetchAndStoreDataByDateRange).toHaveBeenCalledWith(
+        startDate,
+        endDate,
+      );
       expect(result).toEqual(mockBalances);
     });
 
@@ -71,10 +81,14 @@ describe('ElectricalBalanceResolver', () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
       const error = new Error('Service error');
-      
-      jest.spyOn(service, 'fetchAndStoreDataByDateRange').mockRejectedValueOnce(error);
-      
-      await expect(resolver.fetchBalanceByDateRange(startDate, endDate)).rejects.toThrow(error);
+
+      jest
+        .spyOn(service, 'fetchAndStoreDataByDateRange')
+        .mockRejectedValueOnce(error);
+
+      await expect(
+        resolver.fetchBalanceByDateRange(startDate, endDate),
+      ).rejects.toThrow(error);
     });
   });
-}); 
+});

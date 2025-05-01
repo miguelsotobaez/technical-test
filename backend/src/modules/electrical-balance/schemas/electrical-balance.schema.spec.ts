@@ -1,4 +1,7 @@
-import { ElectricalBalance, ElectricalBalanceSchema } from './electrical-balance.schema';
+import {
+  ElectricalBalance,
+  ElectricalBalanceSchema,
+} from './electrical-balance.schema';
 import * as mongoose from 'mongoose';
 // Import global mock data
 import { mockBalance } from '../__mocks__/mockData';
@@ -9,35 +12,47 @@ jest.mock('mongoose', () => {
   return {
     ...originalModule,
     model: jest.fn().mockImplementation((name, schema) => {
-      return function(data) {
+      return function (data) {
         this.data = data;
         this.validateSync = () => {
           const errors: any = {};
-          
+
           // Check required fields
-          if (!data.timestamp) errors.timestamp = { message: 'Timestamp is required' };
-          if (data.generation === undefined) errors.generation = { message: 'Generation is required' };
-          if (data.demand === undefined) errors.demand = { message: 'Demand is required' };
-          
+          if (!data.timestamp)
+            errors.timestamp = { message: 'Timestamp is required' };
+          if (data.generation === undefined)
+            errors.generation = { message: 'Generation is required' };
+          if (data.demand === undefined)
+            errors.demand = { message: 'Demand is required' };
+
           // Check types
-          if (typeof data.generation === 'string') errors.generation = { message: 'Generation must be a number' };
-          if (typeof data.demand === 'string') errors.demand = { message: 'Demand must be a number' };
-          if (typeof data.imports === 'string') errors.imports = { message: 'Imports must be a number' };
-          if (typeof data.exports === 'string') errors.exports = { message: 'Exports must be a number' };
-          if (typeof data.balance === 'string') errors.balance = { message: 'Balance must be a number' };
-          
+          if (typeof data.generation === 'string')
+            errors.generation = { message: 'Generation must be a number' };
+          if (typeof data.demand === 'string')
+            errors.demand = { message: 'Demand must be a number' };
+          if (typeof data.imports === 'string')
+            errors.imports = { message: 'Imports must be a number' };
+          if (typeof data.exports === 'string')
+            errors.exports = { message: 'Exports must be a number' };
+          if (typeof data.balance === 'string')
+            errors.balance = { message: 'Balance must be a number' };
+
           // Check nested details
           if (typeof data.details !== 'object' || data.details === null) {
             errors.details = { message: 'Details must be an object' };
           } else if (data.details) {
             if (data.details.renewable === undefined) {
-              errors['details.renewable'] = { message: 'Renewable is required' };
+              errors['details.renewable'] = {
+                message: 'Renewable is required',
+              };
             }
             if (data.details.nonRenewable === undefined) {
-              errors['details.nonRenewable'] = { message: 'Non-renewable is required' };
+              errors['details.nonRenewable'] = {
+                message: 'Non-renewable is required',
+              };
             }
           }
-          
+
           return Object.keys(errors).length > 0 ? { errors } : undefined;
         };
       };
@@ -139,19 +154,19 @@ describe('ElectricalBalance Schema', () => {
   it('should have a unique index on timestamp', () => {
     // Manually check the schema configuration for indexes
     const uniqueIndex = { unique: true };
-    
+
     // In a real schema, we could use schema.indexes() but we'll mock this for testing
-    jest.spyOn(ElectricalBalanceSchema, 'indexes').mockReturnValue([
-      [{ timestamp: 1 }, uniqueIndex]
-    ]);
-    
+    jest
+      .spyOn(ElectricalBalanceSchema, 'indexes')
+      .mockReturnValue([[{ timestamp: 1 }, uniqueIndex]]);
+
     // Find the timestamp index
     const indexes = ElectricalBalanceSchema.indexes();
-    const timestampIndex = indexes.find(index => 
-      Object.keys(index[0]).includes('timestamp')
+    const timestampIndex = indexes.find((index) =>
+      Object.keys(index[0]).includes('timestamp'),
     );
-    
+
     expect(timestampIndex).toBeDefined();
     expect(timestampIndex![1].unique).toBe(true);
   });
-}); 
+});

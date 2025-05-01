@@ -1,4 +1,7 @@
-import { ElectricalBalanceType, ElectricalBalanceDetails } from './electrical-balance.type';
+import {
+  ElectricalBalanceType,
+  ElectricalBalanceDetails,
+} from './electrical-balance.type';
 
 describe('ElectricalBalanceType', () => {
   it('should be defined', () => {
@@ -7,7 +10,7 @@ describe('ElectricalBalanceType', () => {
 
   it('should have the correct structure', () => {
     const instance = new ElectricalBalanceType();
-    
+
     // Verify expected properties exist on the class
     expect(instance).toHaveProperty('_id', undefined);
     expect(instance).toHaveProperty('timestamp', undefined);
@@ -27,7 +30,7 @@ describe('ElectricalBalanceDetails', () => {
 
   it('should have the correct structure', () => {
     const instance = new ElectricalBalanceDetails();
-    
+
     // Verify expected properties exist on the class
     expect(instance).toHaveProperty('renewable', undefined);
     expect(instance).toHaveProperty('nonRenewable', undefined);
@@ -38,4 +41,4 @@ describe('ElectricalBalanceDetails', () => {
     expect(instance).toHaveProperty('solar', undefined);
     expect(instance).toHaveProperty('thermal', undefined);
   });
-}); 
+});

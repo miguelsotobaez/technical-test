@@ -22,26 +22,35 @@ export class ElectricalBalanceRepository {
     }
   }
 
-  async upsertByTimestamp(data: Partial<ElectricalBalance>): Promise<ElectricalBalance> {
+  async upsertByTimestamp(
+    data: Partial<ElectricalBalance>,
+  ): Promise<ElectricalBalance> {
     try {
       if (!data.timestamp) {
         throw new Error('Timestamp is required for upsert operation');
       }
-      
-      this.logger.log(`Upserting balance record for timestamp: ${data.timestamp}`);
-      
-      return this.electricalBalanceModel.findOneAndUpdate(
-        { timestamp: data.timestamp },
-        data,
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      ).exec();
+
+      this.logger.log(
+        `Upserting balance record for timestamp: ${data.timestamp}`,
+      );
+
+      return this.electricalBalanceModel
+        .findOneAndUpdate({ timestamp: data.timestamp }, data, {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        })
+        .exec();
     } catch (error) {
       this.logger.error('Error upserting balance record', error);
       throw error;
     }
   }
 
-  async findByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  async findByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ElectricalBalance[]> {
     try {
       // Asegurarse de que las fechas sean válidas
       if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
@@ -51,7 +60,9 @@ export class ElectricalBalanceRepository {
         throw new Error('Invalid end date');
       }
 
-      this.logger.log(`Finding balance records between ${startDate.toISOString()} and ${endDate.toISOString()}`);
+      this.logger.log(
+        `Finding balance records between ${startDate.toISOString()} and ${endDate.toISOString()}`,
+      );
 
       return this.electricalBalanceModel
         .find({
@@ -79,4 +90,4 @@ export class ElectricalBalanceRepository {
       throw error;
     }
   }
-} 
+}

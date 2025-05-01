@@ -9,12 +9,12 @@ jest.mock('@nestjs/mongoose', () => ({
   Prop: jest.fn(() => jest.fn()),
   Schema: jest.fn(() => jest.fn()),
   SchemaFactory: {
-    createForClass: jest.fn().mockReturnValue({})
+    createForClass: jest.fn().mockReturnValue({}),
   },
   MongooseModule: {
-    forFeature: jest.fn().mockReturnValue({})
+    forFeature: jest.fn().mockReturnValue({}),
   },
-  InjectModel: jest.fn(() => jest.fn())
+  InjectModel: jest.fn(() => jest.fn()),
 }));
 
 jest.mock('@nestjs/graphql', () => ({
@@ -26,13 +26,13 @@ jest.mock('@nestjs/graphql', () => ({
   InputType: jest.fn(() => jest.fn()),
   Mutation: jest.fn(() => jest.fn()),
   GraphQLModule: {
-    forRoot: jest.fn().mockReturnValue({})
-  }
+    forRoot: jest.fn().mockReturnValue({}),
+  },
 }));
 
 jest.mock('@nestjs/apollo', () => ({
   ApolloDriver: jest.fn(),
-  ApolloDriverConfig: jest.fn()
+  ApolloDriverConfig: jest.fn(),
 }));
 
 jest.mock('@nestjs/common', () => {
@@ -48,20 +48,20 @@ jest.mock('@nestjs/common', () => {
         Reflect.defineMetadata('exports', options.exports || [], target);
         Reflect.defineMetadata('__nestModule', true, target);
       };
-    })
+    }),
   };
 });
 
 jest.mock('./repositories/electrical-balance.repository', () => ({
-  ElectricalBalanceRepository: class MockRepository {}
+  ElectricalBalanceRepository: class MockRepository {},
 }));
 
 jest.mock('./resolvers/electrical-balance.resolver', () => ({
-  ElectricalBalanceResolver: class MockResolver {}
+  ElectricalBalanceResolver: class MockResolver {},
 }));
 
 jest.mock('./services/electrical-balance.service', () => ({
-  ElectricalBalanceService: class MockService {}
+  ElectricalBalanceService: class MockService {},
 }));
 
 describe('ElectricalBalanceModule', () => {
@@ -72,7 +72,10 @@ describe('ElectricalBalanceModule', () => {
 
   it('should have module metadata', () => {
     // Verificar que tiene decorador de módulo
-    const metadata = Reflect.getMetadata('__nestModule', ElectricalBalanceModule);
+    const metadata = Reflect.getMetadata(
+      '__nestModule',
+      ElectricalBalanceModule,
+    );
     expect(metadata).toBeDefined();
   });
 
@@ -95,4 +98,4 @@ describe('ElectricalBalanceModule', () => {
     expect(metadata).toBeDefined();
     expect(metadata).toContain(ElectricalBalanceService);
   });
-}); 
+});

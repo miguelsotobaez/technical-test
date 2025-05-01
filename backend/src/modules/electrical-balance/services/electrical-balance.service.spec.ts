@@ -18,23 +18,25 @@ describe('ElectricalBalanceService', () => {
         {
           provide: HttpService,
           useValue: {
-            get: jest.fn().mockReturnValue(of({ data: mockREEData }))
-          }
+            get: jest.fn().mockReturnValue(of({ data: mockREEData })),
+          },
         },
         {
           provide: ElectricalBalanceRepository,
           useValue: {
             create: jest.fn().mockResolvedValue({}),
             upsertByTimestamp: jest.fn().mockResolvedValue(mockBalance),
-            findByDateRange: jest.fn().mockResolvedValue([mockBalance])
-          }
-        }
-      ]
+            findByDateRange: jest.fn().mockResolvedValue([mockBalance]),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<ElectricalBalanceService>(ElectricalBalanceService);
     httpService = module.get<HttpService>(HttpService);
-    repository = module.get<ElectricalBalanceRepository>(ElectricalBalanceRepository);
+    repository = module.get<ElectricalBalanceRepository>(
+      ElectricalBalanceRepository,
+    );
   });
 
   it('should be defined', () => {
@@ -46,7 +48,10 @@ describe('ElectricalBalanceService', () => {
       const startDate = new Date('2024-04-01');
       const endDate = new Date('2024-04-30');
 
-      const result = await service.fetchAndStoreDataByDateRange(startDate, endDate);
+      const result = await service.fetchAndStoreDataByDateRange(
+        startDate,
+        endDate,
+      );
 
       expect(httpService.get).toHaveBeenCalled();
       expect(repository.upsertByTimestamp).toHaveBeenCalled();
@@ -61,7 +66,9 @@ describe('ElectricalBalanceService', () => {
       const startDate = new Date('2024-04-01');
       const endDate = new Date('2024-04-30');
 
-      await expect(service.fetchAndStoreDataByDateRange(startDate, endDate)).rejects.toThrow('API Error');
+      await expect(
+        service.fetchAndStoreDataByDateRange(startDate, endDate),
+      ).rejects.toThrow('API Error');
     });
   });
 
@@ -71,19 +78,24 @@ describe('ElectricalBalanceService', () => {
         {
           _id: '123',
           ...mockBalance,
-          timestamp: new Date('2024-04-01')
-        } as ElectricalBalance
+          timestamp: new Date('2024-04-01'),
+        } as ElectricalBalance,
       ];
 
-      jest.spyOn(repository, 'findByDateRange').mockResolvedValue(mockBalanceData);
+      jest
+        .spyOn(repository, 'findByDateRange')
+        .mockResolvedValue(mockBalanceData);
 
       const startDate = new Date('2024-04-01');
       const endDate = new Date('2024-04-30');
 
       const result = await service.getBalanceByDateRange(startDate, endDate);
 
-      expect(repository.findByDateRange).toHaveBeenCalledWith(startDate, endDate);
+      expect(repository.findByDateRange).toHaveBeenCalledWith(
+        startDate,
+        endDate,
+      );
       expect(result).toEqual(mockBalanceData);
     });
   });
-}); 
+});

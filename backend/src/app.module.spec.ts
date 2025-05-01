@@ -1,8 +1,5 @@
 import { Test } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ElectricalBalanceModule } from './modules/electrical-balance/electrical-balance.module';
 
 // Mock dependencies
 jest.mock('@nestjs/mongoose', () => ({
@@ -40,4 +37,4 @@ describe('AppModule', () => {
 
     expect(moduleRef).toBeDefined();
   });
-}); 
+});

@@ -52,4 +52,4 @@ export class ElectricalBalanceType {
 
   @Field(() => ElectricalBalanceDetails)
   details: ElectricalBalanceDetails;
-} 
+}

@@ -17,8 +17,8 @@ export const mockBalance = {
     wind: 300,
     solar: 200,
     thermal: 200,
-    storage: 0
-  }
+    storage: 0,
+  },
 };
 
 // Mock REE API response
@@ -29,8 +29,9 @@ export const mockREEData = {
     attributes: {
       title: 'Balance de energía eléctrica',
       'last-update': '2025-01-28T18:25:35.000+01:00',
-      description: 'Balance eléctrico: asignación de unidades de producción según combustible principal.'
-    }
+      description:
+        'Balance eléctrico: asignación de unidades de producción según combustible principal.',
+    },
   },
   included: [
     {
@@ -45,10 +46,10 @@ export const mockREEData = {
               values: [
                 {
                   value: 4063907.231,
-                  datetime: '2024-04-01T00:00:00.000+02:00'
-                }
-              ]
-            }
+                  datetime: '2024-04-01T00:00:00.000+02:00',
+                },
+              ],
+            },
           },
           {
             type: 'Eólica',
@@ -56,10 +57,10 @@ export const mockREEData = {
               values: [
                 {
                   value: 4705864.428,
-                  datetime: '2024-04-01T00:00:00.000+02:00'
-                }
-              ]
-            }
+                  datetime: '2024-04-01T00:00:00.000+02:00',
+                },
+              ],
+            },
           },
           {
             type: 'Solar fotovoltaica',
@@ -67,13 +68,13 @@ export const mockREEData = {
               values: [
                 {
                   value: 4027609.21,
-                  datetime: '2024-04-01T00:00:00.000+02:00'
-                }
-              ]
-            }
-          }
-        ]
-      }
+                  datetime: '2024-04-01T00:00:00.000+02:00',
+                },
+              ],
+            },
+          },
+        ],
+      },
     },
     {
       type: 'No-Renovable',
@@ -87,13 +88,13 @@ export const mockREEData = {
               values: [
                 {
                   value: 3525863.763,
-                  datetime: '2024-04-01T00:00:00.000+02:00'
-                }
-              ]
-            }
-          }
-        ]
-      }
+                  datetime: '2024-04-01T00:00:00.000+02:00',
+                },
+              ],
+            },
+          },
+        ],
+      },
     },
     {
       type: 'Demanda',
@@ -107,13 +108,13 @@ export const mockREEData = {
               values: [
                 {
                   value: 19292564.304,
-                  datetime: '2024-04-01T00:00:00.000+02:00'
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  ]
-}; 
+                  datetime: '2024-04-01T00:00:00.000+02:00',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};

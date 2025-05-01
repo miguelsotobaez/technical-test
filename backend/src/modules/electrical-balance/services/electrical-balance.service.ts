@@ -3,7 +3,11 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ElectricalBalanceRepository } from '../repositories/electrical-balance.repository';
 import { ElectricalBalance } from '../schemas/electrical-balance.schema';
-import { REEApiResponse, REEDataItem, REEDataValue } from '../dto/ree-api-response.dto';
+import {
+  REEApiResponse,
+  REEDataItem,
+  REEDataValue,
+} from '../dto/ree-api-response.dto';
 
 interface BalanceRecord {
   timestamp: Date;
@@ -27,7 +31,8 @@ interface BalanceRecord {
 @Injectable()
 export class ElectricalBalanceService implements OnModuleInit {
   private readonly logger = new Logger(ElectricalBalanceService.name);
-  private readonly REE_API_BASE_URL = 'https://apidatos.ree.es/es/datos/balance/balance-electrico';
+  private readonly REE_API_BASE_URL =
+    'https://apidatos.ree.es/es/datos/balance/balance-electrico';
 
   constructor(
     private readonly httpService: HttpService,
@@ -40,28 +45,34 @@ export class ElectricalBalanceService implements OnModuleInit {
   async onModuleInit() {
     this.logger.log('Inicializando datos históricos de los últimos 5 años...');
     const currentYear = new Date().getFullYear();
-    
+
     try {
       // Iteramos desde el año actual hacia atrás (orden descendente)
       for (let year = currentYear; year >= currentYear - 10; year--) {
         const startDate = new Date(year, 0, 1); // 1 de enero del año
         const endDate = new Date(year, 11, 31); // 31 de diciembre del año
-        
+
         // Verificar si ya existen datos para este año
-        const existingData = await this.electricalBalanceRepository.findByDateRange(startDate, endDate);
-        
+        const existingData =
+          await this.electricalBalanceRepository.findByDateRange(
+            startDate,
+            endDate,
+          );
+
         // Si ya hay al menos algunos datos para este año, omitir la petición
         if (existingData.length > 0) {
-          this.logger.log(`Ya existen ${existingData.length} registros para el año ${year}, omitiendo carga...`);
+          this.logger.log(
+            `Ya existen ${existingData.length} registros para el año ${year}, omitiendo carga...`,
+          );
           continue;
         }
-        
+
         this.logger.log(`Cargando datos del año ${year}...`);
         await this.fetchAndStoreDataByDateRangeInternal(startDate, endDate);
-        
+
         // Esperar 2 segundos entre peticiones para evitar sobrecargar la API
         if (year > currentYear - 4) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
       this.logger.log('Datos históricos cargados correctamente');
@@ -73,7 +84,10 @@ export class ElectricalBalanceService implements OnModuleInit {
   /**
    * Método interno para obtener y almacenar datos sin la restricción de 1 año
    */
-  private async fetchAndStoreDataByDateRangeInternal(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  private async fetchAndStoreDataByDateRangeInternal(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ElectricalBalance[]> {
     try {
       if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
         throw new Error('Invalid start date');
@@ -84,31 +98,43 @@ export class ElectricalBalanceService implements OnModuleInit {
 
       const formattedStartDate = startDate.toISOString().split('T')[0];
       const formattedEndDate = endDate.toISOString().split('T')[0];
-      
+
       const url = `${this.REE_API_BASE_URL}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&time_trunc=month&type=balance&widget=balance-electrico&defaultMagnitude=MWh`;
-      
+
       this.logger.log(`Fetching data from REE API: ${url}`);
-      
+
       const response = await firstValueFrom(
         this.httpService.get<REEApiResponse>(url),
       );
 
       const balanceData = this.transformREEData(response.data);
-      
+
       // Validar cada registro y filtrar aquellos que no tienen timestamp válido
-      const validBalanceData: BalanceRecord[] = balanceData.filter((data): data is BalanceRecord => {
-        return Boolean(data && data.timestamp instanceof Date && !isNaN(data.timestamp.getTime()));
-      });
-      
+      const validBalanceData: BalanceRecord[] = balanceData.filter(
+        (data): data is BalanceRecord => {
+          return Boolean(
+            data &&
+              data.timestamp instanceof Date &&
+              !isNaN(data.timestamp.getTime()),
+          );
+        },
+      );
+
       if (validBalanceData.length > 0) {
-        this.logger.log(`Storing ${validBalanceData.length} valid records in database`);
-        validBalanceData.forEach(data => {
-          this.logger.debug(`Processing record for timestamp: ${data.timestamp.toISOString()}`);
+        this.logger.log(
+          `Storing ${validBalanceData.length} valid records in database`,
+        );
+        validBalanceData.forEach((data) => {
+          this.logger.debug(
+            `Processing record for timestamp: ${data.timestamp.toISOString()}`,
+          );
         });
-        
-        return Promise.all(validBalanceData.map(data => 
-          this.electricalBalanceRepository.upsertByTimestamp(data)
-        ));
+
+        return Promise.all(
+          validBalanceData.map((data) =>
+            this.electricalBalanceRepository.upsertByTimestamp(data),
+          ),
+        );
       } else {
         this.logger.warn('No valid data was transformed from the API response');
         return [];
@@ -119,7 +145,10 @@ export class ElectricalBalanceService implements OnModuleInit {
     }
   }
 
-  async fetchAndStoreDataByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  async fetchAndStoreDataByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ElectricalBalance[]> {
     try {
       if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
         throw new Error('Invalid start date');
@@ -127,7 +156,7 @@ export class ElectricalBalanceService implements OnModuleInit {
       if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
         throw new Error('Invalid end date');
       }
-      
+
       // Ya no validamos el rango máximo de 1 año
 
       // Reutilizar el método interno que no tiene la restricción de 1 año
@@ -138,14 +167,17 @@ export class ElectricalBalanceService implements OnModuleInit {
     }
   }
 
-  async getBalanceByDateRange(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  async getBalanceByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ElectricalBalance[]> {
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
       throw new Error('Invalid start date');
     }
     if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
       throw new Error('Invalid end date');
     }
-    
+
     // Ya no validamos el rango máximo de 1 año
 
     return this.electricalBalanceRepository.findByDateRange(startDate, endDate);
@@ -155,7 +187,10 @@ export class ElectricalBalanceService implements OnModuleInit {
    * Método interno para consultar datos sin restricción de 1 año
    * Útil para otras partes del sistema que necesiten consultar rangos mayores
    */
-  async getBalanceByDateRangeInternal(startDate: Date, endDate: Date): Promise<ElectricalBalance[]> {
+  async getBalanceByDateRangeInternal(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ElectricalBalance[]> {
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
       throw new Error('Invalid start date');
     }
@@ -166,23 +201,33 @@ export class ElectricalBalanceService implements OnModuleInit {
     return this.electricalBalanceRepository.findByDateRange(startDate, endDate);
   }
 
-  private transformREEData(apiData: REEApiResponse): Partial<ElectricalBalance>[] {
+  private transformREEData(
+    apiData: REEApiResponse,
+  ): Partial<ElectricalBalance>[] {
     const transformedData: Partial<ElectricalBalance>[] = [];
-    
+
     // Extract data from the API response
     const included = apiData.included || [];
-    
+
     // Log available types for debugging
     this.logger.log('Available types in API response:');
-    included.forEach(item => {
+    included.forEach((item) => {
       this.logger.log(`- ${item.type}`);
     });
-    
+
     // Find all required data types
-    const renewableData = included.find((item: REEDataItem) => item.type === 'Renovable');
-    const nonRenewableData = included.find((item: REEDataItem) => item.type === 'No-Renovable');
-    const storageData = included.find((item: REEDataItem) => item.type === 'Almacenamiento');
-    const demandData = included.find((item: REEDataItem) => item.type === 'Demanda');
+    const renewableData = included.find(
+      (item: REEDataItem) => item.type === 'Renovable',
+    );
+    const nonRenewableData = included.find(
+      (item: REEDataItem) => item.type === 'No-Renovable',
+    );
+    const storageData = included.find(
+      (item: REEDataItem) => item.type === 'Almacenamiento',
+    );
+    const demandData = included.find(
+      (item: REEDataItem) => item.type === 'Demanda',
+    );
 
     if (!renewableData || !nonRenewableData || !demandData) {
       this.logger.warn('Missing required data in API response');
@@ -195,8 +240,13 @@ export class ElectricalBalanceService implements OnModuleInit {
 
     // Collect all values from each source
     const renewableValues = this.getValuesByType(renewableData, 'Renovable');
-    const nonRenewableValues = this.getValuesByType(nonRenewableData, 'No-Renovable');
-    const storageValues = storageData ? this.getValuesByType(storageData, 'Almacenamiento') : [];
+    const nonRenewableValues = this.getValuesByType(
+      nonRenewableData,
+      'No-Renovable',
+    );
+    const storageValues = storageData
+      ? this.getValuesByType(storageData, 'Almacenamiento')
+      : [];
     const demandValues = this.getValuesByType(demandData, 'Demanda');
 
     // Log found values for debugging
@@ -207,19 +257,21 @@ export class ElectricalBalanceService implements OnModuleInit {
 
     // Extract all unique timestamps from all data sources
     const allTimestamps = new Set<string>();
-    
-    [renewableValues, nonRenewableValues, storageValues, demandValues].forEach(values => {
-      values.forEach(value => {
-        if (value.datetime) {
-          allTimestamps.add(value.datetime);
-        }
-      });
-    });
+
+    [renewableValues, nonRenewableValues, storageValues, demandValues].forEach(
+      (values) => {
+        values.forEach((value) => {
+          if (value.datetime) {
+            allTimestamps.add(value.datetime);
+          }
+        });
+      },
+    );
 
     this.logger.log(`Found ${allTimestamps.size} unique timestamps`);
 
     // Process each unique timestamp
-    Array.from(allTimestamps).forEach(datetimeStr => {
+    Array.from(allTimestamps).forEach((datetimeStr) => {
       try {
         const timestamp = new Date(datetimeStr);
         if (isNaN(timestamp.getTime())) {
@@ -228,23 +280,56 @@ export class ElectricalBalanceService implements OnModuleInit {
         }
 
         // Get all values for this timestamp
-        const renewableGeneration = this.getValueForTimestamp(renewableValues, timestamp);
-        const nonRenewableGeneration = this.getValueForTimestamp(nonRenewableValues, timestamp);
-        const storageGeneration = this.getValueForTimestamp(storageValues, timestamp);
+        const renewableGeneration = this.getValueForTimestamp(
+          renewableValues,
+          timestamp,
+        );
+        const nonRenewableGeneration = this.getValueForTimestamp(
+          nonRenewableValues,
+          timestamp,
+        );
+        const storageGeneration = this.getValueForTimestamp(
+          storageValues,
+          timestamp,
+        );
         const demandValue = this.getValueForTimestamp(demandValues, timestamp);
 
         // Get specific generation values for this timestamp
-        const nuclear = this.getSpecificGeneration(nonRenewableData, 'Nuclear', timestamp);
-        const hydro = this.getSpecificGeneration(renewableData, 'Hidráulica', timestamp);
-        const wind = this.getSpecificGeneration(renewableData, 'Eólica', timestamp);
-        const solar = this.getSpecificGeneration(renewableData, 'Solar fotovoltaica', timestamp);
-        const thermal = this.getSpecificGeneration(nonRenewableData, 'Ciclo combinado', timestamp);
+        const nuclear = this.getSpecificGeneration(
+          nonRenewableData,
+          'Nuclear',
+          timestamp,
+        );
+        const hydro = this.getSpecificGeneration(
+          renewableData,
+          'Hidráulica',
+          timestamp,
+        );
+        const wind = this.getSpecificGeneration(
+          renewableData,
+          'Eólica',
+          timestamp,
+        );
+        const solar = this.getSpecificGeneration(
+          renewableData,
+          'Solar fotovoltaica',
+          timestamp,
+        );
+        const thermal = this.getSpecificGeneration(
+          nonRenewableData,
+          'Ciclo combinado',
+          timestamp,
+        );
 
         // Get international balance
-        const internationalBalance = this.getInternationalBalance(demandData, timestamp);
+        const internationalBalance = this.getInternationalBalance(
+          demandData,
+          timestamp,
+        );
 
         // Calculate total generation including storage
-        const totalGeneration = renewableGeneration + nonRenewableGeneration + storageGeneration;
+        const totalGeneration =
+          renewableGeneration + nonRenewableGeneration + storageGeneration;
 
         // Calculate balance (if demand is available)
         const balance = demandValue ? totalGeneration - demandValue : 0;
@@ -254,7 +339,8 @@ export class ElectricalBalanceService implements OnModuleInit {
           generation: totalGeneration,
           demand: demandValue || 0,
           imports: internationalBalance > 0 ? internationalBalance : 0,
-          exports: internationalBalance < 0 ? Math.abs(internationalBalance) : 0,
+          exports:
+            internationalBalance < 0 ? Math.abs(internationalBalance) : 0,
           balance,
           details: {
             renewable: renewableGeneration,
@@ -269,18 +355,27 @@ export class ElectricalBalanceService implements OnModuleInit {
         };
 
         // Verificar que el timestamp sea válido
-        if (record.timestamp instanceof Date && !isNaN(record.timestamp.getTime())) {
+        if (
+          record.timestamp instanceof Date &&
+          !isNaN(record.timestamp.getTime())
+        ) {
           transformedData.push(record);
-          this.logger.debug(`Added record for timestamp: ${record.timestamp.toISOString()}`);
+          this.logger.debug(
+            `Added record for timestamp: ${record.timestamp.toISOString()}`,
+          );
         } else {
-          this.logger.warn(`Skipping record with invalid timestamp: ${datetimeStr}`);
+          this.logger.warn(
+            `Skipping record with invalid timestamp: ${datetimeStr}`,
+          );
         }
       } catch (error) {
         this.logger.error(`Error processing timestamp ${datetimeStr}:`, error);
       }
     });
 
-    this.logger.log(`Successfully transformed ${transformedData.length} records`);
+    this.logger.log(
+      `Successfully transformed ${transformedData.length} records`,
+    );
     return transformedData;
   }
 
@@ -288,11 +383,11 @@ export class ElectricalBalanceService implements OnModuleInit {
     if (!data?.attributes?.content) {
       return [];
     }
-    
-    const content = data.attributes.content.find((content) => 
-      content.type === type
+
+    const content = data.attributes.content.find(
+      (content) => content.type === type,
     );
-    
+
     if (!content?.attributes?.values) {
       const otherContent = data.attributes.content[0];
       if (otherContent?.attributes?.values) {
@@ -300,38 +395,45 @@ export class ElectricalBalanceService implements OnModuleInit {
       }
       return [];
     }
-    
+
     return content.attributes.values;
   }
 
-  private getValueForTimestamp(values: REEDataValue[], timestamp: Date): number {
+  private getValueForTimestamp(
+    values: REEDataValue[],
+    timestamp: Date,
+  ): number {
     if (!values || values.length === 0) {
       return 0;
     }
-    
-    const value = values.find((value) => 
-      new Date(value.datetime).getTime() === timestamp.getTime()
+
+    const value = values.find(
+      (value) => new Date(value.datetime).getTime() === timestamp.getTime(),
     );
-    
+
     return value?.value || 0;
   }
 
-  private getSpecificGeneration(data: REEDataItem, type: string, timestamp: Date): number {
+  private getSpecificGeneration(
+    data: REEDataItem,
+    type: string,
+    timestamp: Date,
+  ): number {
     if (!data) return 0;
-    
+
     try {
-      const content = data.attributes.content.find((content) => 
-        content.type === type
+      const content = data.attributes.content.find(
+        (content) => content.type === type,
       );
-      
+
       if (!content?.attributes?.values) {
         return 0;
       }
-      
-      const value = content.attributes.values.find((value) => 
-        new Date(value.datetime).getTime() === timestamp.getTime()
+
+      const value = content.attributes.values.find(
+        (value) => new Date(value.datetime).getTime() === timestamp.getTime(),
       );
-      
+
       return value?.value || 0;
     } catch (error) {
       this.logger.warn(`Error getting specific generation for ${type}:`, error);
@@ -339,20 +441,23 @@ export class ElectricalBalanceService implements OnModuleInit {
     }
   }
 
-  private getInternationalBalance(demandData: REEDataItem, timestamp: Date): number {
+  private getInternationalBalance(
+    demandData: REEDataItem,
+    timestamp: Date,
+  ): number {
     if (!demandData) return 0;
-    
+
     try {
-      const content = demandData.attributes.content.find((content) => 
-        content.type === 'Saldo I. internacionales'
+      const content = demandData.attributes.content.find(
+        (content) => content.type === 'Saldo I. internacionales',
       );
-      
+
       if (!content?.attributes?.values) {
         // Buscar en otros contenidos
         for (const c of demandData.attributes.content) {
           if (c.type.includes('internacional') && c.attributes?.values) {
-            const value = c.attributes.values.find((v) => 
-              new Date(v.datetime).getTime() === timestamp.getTime()
+            const value = c.attributes.values.find(
+              (v) => new Date(v.datetime).getTime() === timestamp.getTime(),
             );
             if (value) {
               return value.value;
@@ -361,15 +466,15 @@ export class ElectricalBalanceService implements OnModuleInit {
         }
         return 0;
       }
-      
-      const value = content.attributes.values.find((value) => 
-        new Date(value.datetime).getTime() === timestamp.getTime()
+
+      const value = content.attributes.values.find(
+        (value) => new Date(value.datetime).getTime() === timestamp.getTime(),
       );
-      
+
       return value?.value || 0;
     } catch (error) {
       this.logger.warn('Error getting international balance:', error);
       return 0;
     }
   }
-} 
+}
