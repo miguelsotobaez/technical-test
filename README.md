@@ -1,5 +1,12 @@
 # Technical Test – Fullstack Developer (React + Node.js)
 
+## Demo en Vivo
+
+🌐 **Sitio publicado**: [https://ree-site.onrender.com/](https://ree-site.onrender.com/)  
+📂 **Repositorio**: [https://github.com/miguelsotobaez/technical-test](https://github.com/miguelsotobaez/technical-test)
+
+El proyecto está desplegado en render.com y disponible para su visualización. El dashboard muestra los datos históricos del balance eléctrico de España, obtenidos desde la API pública de REE.
+
 ## Objetivo
 Construir un sistema Fullstack que obtenga datos en tiempo real desde la API pública de REE (Red Eléctrica de España) — específicamente los datos de Balance Eléctrico —, los almacene en una base de datos MongoDB, y los exponga mediante una API GraphQL. Además, debe incluir un frontend en React que consuma esa API y muestre la información de forma clara e interactiva.
 
@@ -122,7 +129,7 @@ La forma más sencilla de ejecutar todo el sistema es usando Docker Compose:
 
 2. Clona el repositorio:
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/miguelsotobaez/technical-test.git
 cd technical-test
 ```
 
@@ -198,7 +205,6 @@ El frontend estará disponible en http://localhost:5173
 - **Manejo de Estados**: Indicadores de carga y mensajes de error para mejorar la experiencia de usuario.
 
 ## Estructura del Proyecto
-
 ```
 .
 ├── backend/
