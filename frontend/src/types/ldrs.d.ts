@@ -1,21 +1,21 @@
 declare namespace JSX {
   interface IntrinsicElements {
-    'l-newtons-cradle': any;
-    'l-ring': any;
-    'l-orbit': any;
-    'l-quantum': any;
-    'l-tailspin': any;
-    'l-dotwave': any;
-    'l-spiral': any;
-    'l-pulsar': any;
-    'l-ripples': any;
-    'l-bouncy': any;
-    'l-helix': any;
-    'l-infinity': any;
-    'l-wobble': any;
-    'l-waveform': any;
-    'l-square': any;
-    'l-dotspinner': any;
+    'l-newtons-cradle': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-ring': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-orbit': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-quantum': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-tailspin': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-dotwave': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-spiral': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-pulsar': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-ripples': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-bouncy': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-helix': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-infinity': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-wobble': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-waveform': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-square': JSX.IntrinsicAttributes & { [key: string]: unknown };
+    'l-dotspinner': JSX.IntrinsicAttributes & { [key: string]: unknown };
   }
 }
 

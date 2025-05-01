@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { ElectricalBalance } from "../types";
 import { cn } from "../lib/utils";
 
@@ -9,11 +9,9 @@ interface ShadcnChartProps {
 export function ShadcnChart({ data }: ShadcnChartProps) {
   const [activeTab, setActiveTab] = useState<'balance' | 'generation' | 'sources'>('balance');
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [chartWidth, setChartWidth] = useState(0);
-  const [chartHeight, setChartHeight] = useState(0);
 
   // Procesamiento de datos para el gráfico
-  const processData = () => {
+  const processData = useCallback(() => {
     if (!data || data.length === 0) return null;
 
     // Ordena los datos por fecha
@@ -44,9 +42,9 @@ export function ShadcnChart({ data }: ShadcnChartProps) {
     }
 
     return { sortedData, maxValue };
-  };
+  }, [data, activeTab]);
 
-  const drawChart = () => {
+  const drawChart = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -61,8 +59,6 @@ export function ShadcnChart({ data }: ShadcnChartProps) {
     // Configura el canvas
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    setChartWidth(rect.width);
-    setChartHeight(rect.height);
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -259,13 +255,14 @@ export function ShadcnChart({ data }: ShadcnChartProps) {
         ctx.fillText(label, x, padding.top + chartInnerHeight + 10);
       }
     });
-  };
+  }, [activeTab, processData]);
 
   useEffect(() => {
-    if (data.length > 0) {
-      drawChart();
-    }
-    
+    drawChart();
+  }, [data, activeTab, drawChart]);
+
+  // Add this function to capture dependencies properly
+  useEffect(() => {
     const handleResize = () => {
       drawChart();
     };
@@ -274,7 +271,7 @@ export function ShadcnChart({ data }: ShadcnChartProps) {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [data, activeTab]);
+  }, [data, activeTab, drawChart]);
 
   if (data.length === 0) {
     return (

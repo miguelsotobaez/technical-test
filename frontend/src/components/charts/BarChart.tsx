@@ -1,66 +1,56 @@
-import { AreaChart, Area, XAxis, CartesianGrid, Legend, YAxis, Line, ComposedChart, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
+import { AreaChart, Area, XAxis, CartesianGrid,  YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { ElectricalBalance } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useMemo } from "react";
-import { ArrowUp, ArrowDown, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 interface BarChartProps {
   data: ElectricalBalance[];
 }
 
 export function BarChart({ data }: BarChartProps) {
-  if (!data || data.length === 0) {
-    return <div className="flex h-48 items-center justify-center text-muted-foreground">No data available</div>;
-  }
-
-  // Process and prepare data for the chart - sort by date
-  const sortedData = [...data].sort((a, b) => 
-    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  );
-
-  // Format data for area chart - convert MWh to GWh
-  const chartData = sortedData.map((item) => {    
-    return {
+  // Process and prepare data for the chart - sort by date and convert to GWh
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    
+    const sortedData = [...data].sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    
+    return sortedData.map((item) => ({
       date: item.timestamp,
       generation: item.generation / 1000, // Convert to GWh
       demand: item.demand / 1000, // Convert to GWh
       exports: item.exports / 1000, // Convert to GWh
       imports: item.imports / 1000, // Convert to GWh
-    };
-  });
-
-  // Define chart configuration
-  const chartConfig: ChartConfig = {
-    generation: {
-      label: "Generación",
-      color: "hsl(var(--chart-1))",
-    },
-    demand: {
-      label: "Demanda",
-      color: "hsl(var(--chart-2))",
-    },
-    exports: {
-      label: "Exportaciones",
-      color: "hsl(var(--chart-3))",
-    },
-    imports: {
-      label: "Importaciones",
-      color: "hsl(var(--chart-4))",
-    },
-  };
+    }));
+  }, [data]);
 
   // Calculate totals for display
-  const totals = useMemo(() => ({
-    generation: chartData.reduce((acc, curr) => acc + curr.generation, 0),
-    demand: chartData.reduce((acc, curr) => acc + curr.demand, 0),
-    exports: chartData.reduce((acc, curr) => acc + curr.exports, 0),
-    imports: chartData.reduce((acc, curr) => acc + curr.imports, 0),
-  }), [chartData]);
+  const totals = useMemo(() => {
+    if (chartData.length === 0) {
+      return {
+        generation: 0,
+        demand: 0,
+        exports: 0,
+        imports: 0
+      };
+    }
+    
+    return {
+      generation: chartData.reduce((acc, curr) => acc + curr.generation, 0),
+      demand: chartData.reduce((acc, curr) => acc + curr.demand, 0),
+      exports: chartData.reduce((acc, curr) => acc + curr.exports, 0),
+      imports: chartData.reduce((acc, curr) => acc + curr.imports, 0),
+    };
+  }, [chartData]);
 
   // Calculate trend percentage from first to last month
   const trendCalculation = useMemo(() => {
-    if (chartData.length < 2) return { percentage: 0, isUp: true };
+    if (chartData.length < 2) {
+      return { percentage: 0, isUp: true };
+    }
     
     const firstValue = chartData[0].generation;
     const lastValue = chartData[chartData.length - 1].generation;
@@ -84,6 +74,30 @@ export function BarChart({ data }: BarChartProps) {
     
     return `${firstDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - ${lastDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
   }, [chartData]);
+
+  // Define chart configuration
+  const chartConfig: ChartConfig = {
+    generation: {
+      label: "Generación",
+      color: "hsl(var(--chart-1))",
+    },
+    demand: {
+      label: "Demanda",
+      color: "hsl(var(--chart-2))",
+    },
+    exports: {
+      label: "Exportaciones",
+      color: "hsl(var(--chart-3))",
+    },
+    imports: {
+      label: "Importaciones",
+      color: "hsl(var(--chart-4))",
+    },
+  };
+
+  if (!data || data.length === 0) {
+    return <div className="flex h-48 items-center justify-center text-muted-foreground">No data available</div>;
+  }
 
   return (
     <Card className="bg-white dark:bg-gray-900">
@@ -173,11 +187,11 @@ export function BarChart({ data }: BarChartProps) {
                         month: 'long',
                         year: 'numeric'
                       });
-                    } catch (error) {
+                    } catch {
                       return String(value);
                     }
                   }}
-                  formatter={(value, name, entry, index) => {
+                  formatter={(value, name) => {
                     // Obtener el nombre legible según la clave de datos
                     let label = '';
                     switch (String(name)) {

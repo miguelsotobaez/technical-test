@@ -1,4 +1,4 @@
-import { PieChart as RechartsPieChart, Pie, Cell, Tooltip } from "recharts";
+import { PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { ElectricalBalance } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
