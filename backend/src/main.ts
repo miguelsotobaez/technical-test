@@ -8,6 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://ree-site.onrender.com',
+      'https://ree.misoba.dev',
       'http://localhost',
       'http://localhost:80',
       'http://localhost:5173',
