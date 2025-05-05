@@ -2,7 +2,7 @@
 
 ## Demo en Vivo
 
-🌐 **Sitio publicado**: [https://ree-site.onrender.com/](https://ree-site.onrender.com/)  
+🌐 **Sitio publicado**: [https://ree.misoba.dev/](https://ree.misoba.dev/)  
 📂 **Repositorio**: [https://github.com/miguelsotobaez/technical-test](https://github.com/miguelsotobaez/technical-test)
 
 El proyecto está desplegado en render.com y disponible para su visualización. El dashboard muestra los datos históricos del balance eléctrico de España, obtenidos desde la API pública de REE.
