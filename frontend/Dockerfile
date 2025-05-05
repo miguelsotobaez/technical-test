@@ -2,10 +2,6 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
-# Variables de entorno para la construcción
-ARG VITE_API_URL=/graphql
-ENV VITE_API_URL=${VITE_API_URL}
-
 # Copiar archivos de dependencias
 COPY package.json package-lock.json ./
 
