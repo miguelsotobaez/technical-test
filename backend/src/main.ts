@@ -4,22 +4,25 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuración de CORS
+  const allowedOrigins = [
+    'https://ree-site.onrender.com',
+    'https://ree.misoba.dev',
+    'http://localhost',
+    'http://localhost:80',
+    'http://localhost:5173',
+  ];
+  
   app.enableCors({
-    origin: [
-      'https://ree-site.onrender.com',
-      'https://ree.misoba.dev',
-      'http://localhost',
-      'http://localhost:80',
-      'http://localhost:5173',
-    ],
-    methods: ['GET', 'POST', 'OPTIONS'],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Apollo-Require-Preflight',
-    ],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Apollo-Require-Preflight'],
   });
 
   await app.listen(process.env.PORT ?? 3000);
